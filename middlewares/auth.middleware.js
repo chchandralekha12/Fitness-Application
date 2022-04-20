@@ -11,6 +11,7 @@ module.exports = async (req, res, next) => {
         if(!isTokenValid) {
             return res.status(401).send({ status: false, error: { message: 'Unauthorized' } });
         }
+        req.userId = isTokenValid.userId
         next();
     } catch (error) {
         return res.status(401).send({ status: false, error: { message: 'Unauthorized' } });

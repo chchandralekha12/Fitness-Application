@@ -80,5 +80,91 @@ module.exports = {
             console.log('UserController.login', error);
             return res.status(500).send({ status: false, error: { message: 'Something went wrong. please try again' } });
         }
+    },
+
+    changePassword: async (req, res) => {
+        try {
+            const { email, oldPassword, newPassword } = req.body;
+            if (!email) {
+                return res.status(400).send({ status: false, error: { message: 'email is required.' } });
+            }
+            if (!validateEmail(email)) {
+                return res.status(400).send({ status: false, error: { message: 'invalid email.' } });
+            }
+            if (!oldPassword) {
+                return res.status(400).send({ status: false, error: { message: 'old password is required.' } });
+            }
+            if (!newPassword) {
+                return res.status(400).send({ status: false, error: { message: 'new password is required.' } });
+            }
+            const user = await UserModel.findOne({ Email: email });
+            if (!user) {
+                return res.status(401).send({ status: false, error: { message: 'old password incorrect.' } });
+            }
+            const isPasswordValid = await bcrypt.compare(oldPassword, user.PasswordHash);
+            if (!isPasswordValid) {
+                return res.status(401).send({ status: false, error: { message: 'old password incorrect.' } });
+            }
+            user.PasswordHash = await bcrypt.hash(newPassword, saltrounds);
+            await user.save();
+            return res.send({
+                status: true,
+                data: {
+                    message: "password changed successfully."
+                }
+            });
+        } catch (error) {
+            console.log('UserController.changePassword', error);
+            return res.status(500).send({ status: false, error: { message: 'Something went wrong. please try again' } });
+        }
+    },
+
+    addSubscription: async (req, res) => {
+        try {
+            const { subscription } = req.body;
+            if (!subscription) {
+                return res.status(400).send({ status: false, error: { message: 'subscription is required.' } });
+            }
+            await UserModel.findByIdAndUpdate(req.userId, { Subscription: subscription });
+            return res.send({
+                status: true,
+                data: {
+                    message: "subscription added successfully."
+                }
+            });
+        } catch (error) {
+            console.log('UserController.addSubscription', error);
+            return res.status(500).send({ status: false, error: { message: 'Something went wrong. please try again' } });
+        }
+    },
+
+    getSubscription: async (req, res) => {
+        try {
+            const user = await UserModel.findById(req.userId);
+            return res.send({
+                status: true,
+                data: {
+                    subscription: user.Subscription
+                }
+            });
+        } catch (error) {
+            console.log('UserController.cancelSubscription', error);
+            return res.status(500).send({ status: false, error: { message: 'Something went wrong. please try again' } });
+        }
+    },
+
+    cancelSubscription: async (req, res) => {
+        try {
+            await UserModel.findByIdAndUpdate(req.userId, { Subscription: null });
+            return res.send({
+                status: true,
+                data: {
+                    message: "subscription cancelled successfully."
+                }
+            });
+        } catch (error) {
+            console.log('UserController.cancelSubscription', error);
+            return res.status(500).send({ status: false, error: { message: 'Something went wrong. please try again' } });
+        }
     }
 }

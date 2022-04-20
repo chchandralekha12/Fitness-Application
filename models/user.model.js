@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
     PasswordHash: {
         type: String,
         required: true
+    },
+    Subscription: {
+        type: Number,
+        default: null
     }
 });
 
