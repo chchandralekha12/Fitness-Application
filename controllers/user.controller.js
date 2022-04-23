@@ -84,20 +84,14 @@ module.exports = {
 
     changePassword: async (req, res) => {
         try {
-            const { email, oldPassword, newPassword } = req.body;
-            if (!email) {
-                return res.status(400).send({ status: false, error: { message: 'email is required.' } });
-            }
-            if (!validateEmail(email)) {
-                return res.status(400).send({ status: false, error: { message: 'invalid email.' } });
-            }
+            const { oldPassword, newPassword } = req.body;
             if (!oldPassword) {
                 return res.status(400).send({ status: false, error: { message: 'old password is required.' } });
             }
             if (!newPassword) {
                 return res.status(400).send({ status: false, error: { message: 'new password is required.' } });
             }
-            const user = await UserModel.findOne({ Email: email });
+            const user = await UserModel.findById(req.userId);
             if (!user) {
                 return res.status(401).send({ status: false, error: { message: 'old password incorrect.' } });
             }
